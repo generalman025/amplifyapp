@@ -32,6 +32,10 @@ function App() {
   async function createNote() {
     if (!formData.name || !formData.description) return;
     await API.graphql({ query: createNoteMutation, variables: { input: formData } });
+    if (formData.image) {
+      const image = await Storage.get(formData.image);
+      formData.image = image;
+    }
     setNotes([ ...notes, formData ]);
     setFormData(initialFormState);
   }
@@ -63,17 +67,23 @@ function App() {
         placeholder="Note description"
         value={formData.description}
       />
+      <input
+        type="file"
+        onChange={onChange}/>
       <button onClick={createNote}>Create Note</button>
       <div style={{marginBottom: 30}}>
-        {
-          notes.map(note => (
-            <div key={note.id || note.name}>
-              <h2>{note.name}</h2>
-              <p>{note.description}</p>
-              <button onClick={() => deleteNote(note)}>Delete note</button>
-            </div>
-          ))
-        }
+      {
+        notes.map(note => (
+          <div key={note.id || note.name}>
+            <h2>{note.name}</h2>
+            <p>{note.description}</p>
+            <button onClick={() => deleteNote(note)}>Delete note</button>
+            {
+              note.image && <img src={note.image} style={{width: 400}} />
+            }
+          </div>
+        ))
+      }
       </div>
       <AmplifySignOut />
     </div>
